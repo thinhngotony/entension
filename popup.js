@@ -105,8 +105,8 @@ function renderTranslations() {
       <div class="card-header">
         <span class="card-date">${formatDate(translation.timestamp)}</span>
         <div class="card-actions">
-          <button class="icon-btn" onclick="speakText('${escapeQuotes(translation.original)}')" title="Speak original">🔊</button>
-          <button class="icon-btn" onclick="deleteTranslation('${translation.id}')" title="Delete">🗑️</button>
+          <button class="icon-btn speak-btn" data-text="${escapeHtml(translation.original)}" title="Speak original">🔊</button>
+          <button class="icon-btn delete-btn" data-id="${translation.id}" title="Delete">🗑️</button>
         </div>
       </div>
       <div class="card-content">
@@ -121,6 +121,19 @@ function renderTranslations() {
       </div>
     </div>
   `).join('');
+  
+  // Add event listeners to buttons after rendering
+  container.querySelectorAll('.speak-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      speakText(btn.dataset.text);
+    });
+  });
+  
+  container.querySelectorAll('.delete-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      deleteTranslation(btn.dataset.id);
+    });
+  });
 }
 
 // Format date for display
@@ -141,16 +154,16 @@ function formatDate(timestamp) {
 }
 
 // Speak text using Web Speech API
-window.speakText = function(text) {
+function speakText(text) {
   if ('speechSynthesis' in window) {
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = 'en-US';
     speechSynthesis.speak(utterance);
   }
-};
+}
 
 // Delete a translation
-window.deleteTranslation = function(id) {
+function deleteTranslation(id) {
   if (confirm('Delete this translation?')) {
     chrome.runtime.sendMessage({ 
       action: "deleteTranslation", 
@@ -161,7 +174,7 @@ window.deleteTranslation = function(id) {
       }
     });
   }
-};
+}
 
 // Export translations as JSON
 function exportTranslations() {
@@ -180,20 +193,21 @@ function exportTranslations() {
 // Clear all translations
 function clearAllTranslations() {
   if (confirm('Are you sure you want to delete all translations? This cannot be undone!')) {
-    chrome.storage.local.set({ translations: [] }, () => {
-      allTranslations = [];
-      loadTranslations();
+    // Use background script messaging for consistency
+    chrome.runtime.sendMessage({ 
+      action: "clearAllTranslations"
+    }, (response) => {
+      if (response && response.success) {
+        allTranslations = [];
+        loadTranslations();
+      }
     });
   }
 }
 
-// Utility functions
+// Utility function
 function escapeHtml(text) {
   const div = document.createElement('div');
   div.textContent = text;
   return div.innerHTML;
-}
-
-function escapeQuotes(text) {
-  return text.replace(/'/g, "\\'").replace(/"/g, '\\"');
 }

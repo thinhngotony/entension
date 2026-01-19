@@ -59,6 +59,15 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         sendResponse({ success: false, error: error.message });
       });
     return true;
+  } else if (request.action === "clearAllTranslations") {
+    clearAllTranslations()
+      .then(() => {
+        sendResponse({ success: true });
+      })
+      .catch(error => {
+        sendResponse({ success: false, error: error.message });
+      });
+    return true;
   }
 });
 
@@ -76,7 +85,12 @@ async function translateText(text, sourceLang = "auto", targetLang = "vi") {
     // Use MyMemory Translation API (free, no API key required)
     const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${sourceLang}|${targetLang}`;
     
-    const response = await fetch(url);
+    // Add timeout for better error handling
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+    
+    const response = await fetch(url, { signal: controller.signal });
+    clearTimeout(timeoutId);
     const data = await response.json();
     
     if (data.responseStatus === 200 && data.responseData) {
@@ -149,6 +163,19 @@ async function deleteTranslation(id) {
           resolve();
         }
       });
+    });
+  });
+}
+
+// Clear all translations
+async function clearAllTranslations() {
+  return new Promise((resolve, reject) => {
+    chrome.storage.local.set({ translations: [] }, () => {
+      if (chrome.runtime.lastError) {
+        reject(chrome.runtime.lastError);
+      } else {
+        resolve();
+      }
     });
   });
 }

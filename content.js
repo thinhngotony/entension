@@ -33,14 +33,38 @@ function showTranslationUI(text) {
     </div>
   `;
   
-  // Position near the selection
+  // Position near the selection with viewport boundary checks
   const selection = window.getSelection();
   if (selection.rangeCount > 0) {
     const range = selection.getRangeAt(0);
     const rect = range.getBoundingClientRect();
     
-    translationBubble.style.top = `${window.scrollY + rect.bottom + 10}px`;
-    translationBubble.style.left = `${window.scrollX + rect.left}px`;
+    let top = window.scrollY + rect.bottom + 10;
+    let left = window.scrollX + rect.left;
+    
+    // Ensure bubble stays within viewport
+    const bubbleWidth = 320; // min-width from CSS
+    const bubbleHeight = 300; // estimated height
+    
+    // Keep within horizontal bounds
+    if (left + bubbleWidth > window.innerWidth) {
+      left = window.innerWidth - bubbleWidth - 10;
+    }
+    if (left < 10) {
+      left = 10;
+    }
+    
+    // Keep within vertical bounds - show above if needed
+    if (top + bubbleHeight > window.scrollY + window.innerHeight) {
+      top = window.scrollY + rect.top - bubbleHeight - 10;
+      // If still out of bounds, just position at bottom with some margin
+      if (top < window.scrollY + 10) {
+        top = window.scrollY + window.innerHeight - bubbleHeight - 10;
+      }
+    }
+    
+    translationBubble.style.top = `${top}px`;
+    translationBubble.style.left = `${left}px`;
   }
   
   document.body.appendChild(translationBubble);
