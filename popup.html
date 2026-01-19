@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Entension - Your Saved Translations</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <h1 class="title">⚡ Entension</h1>
+      <p class="subtitle">Your English Learning Companion</p>
+    </header>
+
+    <div class="stats">
+      <div class="stat-item">
+        <span class="stat-number" id="totalWords">0</span>
+        <span class="stat-label">Words Saved</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number" id="todayWords">0</span>
+        <span class="stat-label">Today</span>
+      </div>
+    </div>
+
+    <div class="search-box">
+      <input type="text" id="searchInput" placeholder="🔍 Search your translations..." />
+    </div>
+
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="all">All</button>
+      <button class="tab-btn" data-tab="recent">Recent</button>
+      <button class="tab-btn" data-tab="review">Review</button>
+    </div>
+
+    <div class="translations-container" id="translationsContainer">
+      <div class="empty-state">
+        <div class="empty-icon">📚</div>
+        <p>No translations yet!</p>
+        <p class="empty-hint">Right-click any text on a webpage and select "Translate with Entension"</p>
+      </div>
+    </div>
+
+    <div class="footer">
+      <button class="action-btn" id="exportBtn">📥 Export</button>
+      <button class="action-btn" id="clearBtn">🗑️ Clear All</button>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
